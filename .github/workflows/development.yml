@@ -20,28 +20,22 @@ jobs:
     runs-on: macos-14
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repository (with submodules)
         uses: actions/checkout@v4
         with:
           submodules: true
 
-      # (Optional) lock Xcode version if the project needs a specific one
+      # If a specific Xcode is needed, uncomment and set the version:
       # - name: Select Xcode
       #   uses: maxim-lobanov/setup-xcode@v1
       #   with:
       #     xcode-version: '15.4'
 
-      - name: Ensure build deps (Homebrew gmake etc.)
+      - name: Install GNU Make (gmake)
         run: |
-          brew update
-          # gmake provides the 'gmake' binary the Makefile expects
-          brew install make wget cmake ninja pkg-config || true
-          echo "PATH before: $PATH"
-          echo "/opt/homebrew/bin" >> $GITHUB_PATH
-
-      # If you really need to wipe workspace, do it AFTER checkout only in a temp dir.
-      # The previous workflow deleted the whole working dir before checkout (fine),
-      # but we don't need that on hosted runners.
+          brew install make || brew reinstall make
+          which gmake
+          gmake --version
 
       - name: Build for ${{ matrix.platform_name }}
         shell: bash
@@ -55,8 +49,10 @@ jobs:
             gmake -j"$(sysctl -n hw.ncpu)" dsym package PLATFORM=${{ matrix.platform }}
             gmake -j"$(sysctl -n hw.ncpu)" dsym package PLATFORM=${{ matrix.platform }} TROLLSTORE_JIT_ENT=1
           elif [ "${{ matrix.platform_name }}" == "tvos" ]; then
+            # Build tipa only for tvOS
             gmake -j"$(sysctl -n hw.ncpu)" dsym package PLATFORM=${{ matrix.platform }} TROLLSTORE_JIT_ENT=1
           else
+            # Build ipa only for everything else
             gmake -j"$(sysctl -n hw.ncpu)" dsym package PLATFORM=${{ matrix.platform }}
           fi
 
