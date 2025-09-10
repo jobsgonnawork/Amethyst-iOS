@@ -37,12 +37,12 @@ jobs:
           which gmake
           gmake --version
 
-      - name: Set up JDK 8 (Temurin)
+      - name: Set up JDK 8 (Zulu)
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
+          distribution: zulu
           java-version: '8'
-          # architecture auto-detected on macos-14 (arm64)
+          java-package: jdk
 
       - name: Verify Java
         run: |
