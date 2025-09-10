@@ -25,7 +25,7 @@ jobs:
         with:
           submodules: true
 
-      # If a specific Xcode is needed, uncomment and set the version:
+      # Optional: pin a specific Xcode if the project needs it
       # - name: Select Xcode
       #   uses: maxim-lobanov/setup-xcode@v1
       #   with:
@@ -44,11 +44,18 @@ jobs:
           java-version: '8'
           java-package: jdk
 
-      - name: Verify Java
+      - name: Install required tools (ldid)
         run: |
-          echo "JAVA_HOME=${JAVA_HOME:-unset}"
-          java -version
-          javac -version
+          brew install ldid || true
+          which ldid || true
+          which wget || true
+
+      # *** Key fix: point Makefile to our JDK 8 ***
+      - name: Export BOOTJDK for Makefile
+        run: |
+          echo "JAVA_HOME=${JAVA_HOME}"
+          echo "Setting BOOTJDK to \$JAVA_HOME/bin"
+          echo "BOOTJDK=${JAVA_HOME}/bin" >> "$GITHUB_ENV"
 
       - name: Build for ${{ matrix.platform_name }}
         shell: bash
@@ -56,7 +63,8 @@ jobs:
           set -euo pipefail
           export PATH=/opt/homebrew/bin:$PATH
           export SLIMMED=1
-          echo "Using JAVA_HOME=${JAVA_HOME:-unset}"
+          echo "Using JAVA_HOME=${JAVA_HOME}"
+          echo "Using BOOTJDK=${BOOTJDK}"
           java -version
 
           if [ "${{ matrix.platform_name }}" == "ios" ]; then
