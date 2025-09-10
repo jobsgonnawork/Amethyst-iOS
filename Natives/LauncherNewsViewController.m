@@ -51,7 +51,8 @@ UIEdgeInsets insets;
     }
     
     if (@available(iOS 26.0, *)) {
-        [self showWarningAlert:@"ios19_jitdead" hasPreference:NO exitWhenCompleted:YES];
+        //StikDebug Works in iOS 26 now.
+        //[self showWarningAlert:@"ios19_jitdead" hasPreference:NO exitWhenCompleted:YES];
     }
 
     self.navigationItem.leftBarButtonItem = self.splitViewController.displayModeButtonItem;
